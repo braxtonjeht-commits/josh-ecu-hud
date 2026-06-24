@@ -594,6 +594,23 @@ db.channel('hud-orders')
 // ============================================
 // INIT + AUTO REFRESH every 60s as fallback
 // ============================================
+
+// unlock audio on first click anywhere
+let audioUnlocked = false;
+document.addEventListener('click', () => {
+  if (!audioUnlocked) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.001);
+    audioUnlocked = true;
+  }
+}, { once: false });
+
 loadOrders();
 setInterval(loadOrders, 60000);
 </script>
