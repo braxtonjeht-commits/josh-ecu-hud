@@ -567,7 +567,7 @@ function renderGrid() {
         <div class="hud-card-accent" style="background:${cfg.color}"></div>
         <div style="padding-left:8px">
           <div class="hud-card-top">
-            <div class="hud-order-id">${o.order_id}</div>
+            <div class="hud-order-id">${s(o.order_id)}</div>
             <div class="hud-days ${overdue ? 'overdue' : ''}">${days}</div>
           </div>
           <div class="hud-customer">${s(o.customer_name)}</div>
