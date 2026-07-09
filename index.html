@@ -540,10 +540,11 @@ async function loadOrders() {
 }
 
 function updateStats() {
-  const active   = allOrders.filter(o => ACTIVE_STATUSES.includes(o.status)).length;
-  const waiting  = allOrders.filter(o => o.status === 'Waiting on Parts').length;
-  const complete = allOrders.filter(o => DONE_STATUSES.includes(o.status)).length;
-  const unpaid   = allOrders.filter(o => !o.paid && DONE_STATUSES.includes(o.status)).length;
+  const visible  = allOrders.filter(o => !o.archived);
+  const active   = visible.filter(o => ACTIVE_STATUSES.includes(o.status)).length;
+  const waiting  = visible.filter(o => o.status === 'Waiting on Parts').length;
+  const complete = visible.filter(o => DONE_STATUSES.includes(o.status)).length;
+  const unpaid   = visible.filter(o => !o.paid && DONE_STATUSES.includes(o.status)).length;
 
   document.getElementById('s-active').textContent   = active;
   document.getElementById('s-waiting').textContent  = waiting;
@@ -561,9 +562,10 @@ function daysSince(dateStr) {
 function renderGrid() {
   // show active orders first, then completed
   const byPriority = (a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
-  const active   = allOrders.filter(o => ACTIVE_STATUSES.includes(o.status)).sort(byPriority);
-  const done     = allOrders.filter(o => DONE_STATUSES.includes(o.status)).slice(0, 6);
-  const pending  = allOrders.filter(o => ['Label Sent','Awaiting Shipment'].includes(o.status)).sort(byPriority);
+  const visible  = allOrders.filter(o => !o.archived);
+  const active   = visible.filter(o => ACTIVE_STATUSES.includes(o.status)).sort(byPriority);
+  const done     = visible.filter(o => DONE_STATUSES.includes(o.status)).slice(0, 6);
+  const pending  = visible.filter(o => ['Label Sent','Awaiting Shipment'].includes(o.status)).sort(byPriority);
   const display  = [...active, ...pending, ...done];
 
   const label = `${active.length} Active · ${pending.length} Pending · ${done.length} Recent`;
