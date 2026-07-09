@@ -155,6 +155,25 @@
     border-color: var(--accent);
   }
 
+  .hud-card.priority {
+    border-color: rgba(249,115,22,0.55);
+    box-shadow: 0 0 16px rgba(249,115,22,0.18);
+  }
+
+  .hud-priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: monospace;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #f97316;
+    background: rgba(249,115,22,0.14);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
   @keyframes newOrderPulse {
     0%, 100% { border-color: var(--border); box-shadow: none; }
     50% { border-color: var(--accent); box-shadow: 0 0 20px rgba(232,93,4,0.3); }
@@ -541,9 +560,10 @@ function daysSince(dateStr) {
 
 function renderGrid() {
   // show active orders first, then completed
-  const active   = allOrders.filter(o => ACTIVE_STATUSES.includes(o.status));
+  const byPriority = (a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+  const active   = allOrders.filter(o => ACTIVE_STATUSES.includes(o.status)).sort(byPriority);
   const done     = allOrders.filter(o => DONE_STATUSES.includes(o.status)).slice(0, 6);
-  const pending  = allOrders.filter(o => ['Label Sent','Awaiting Shipment'].includes(o.status));
+  const pending  = allOrders.filter(o => ['Label Sent','Awaiting Shipment'].includes(o.status)).sort(byPriority);
   const display  = [...active, ...pending, ...done];
 
   const label = `${active.length} Active · ${pending.length} Pending · ${done.length} Recent`;
@@ -563,11 +583,14 @@ function renderGrid() {
     const isNew = pendingNewOrderIds.has(o.order_id);
 
     return `
-      <div class="hud-card ${isNew ? 'new-order' : ''}">
-        <div class="hud-card-accent" style="background:${cfg.color}"></div>
+      <div class="hud-card ${isNew ? 'new-order' : ''} ${o.priority ? 'priority' : ''}">
+        <div class="hud-card-accent" style="background:${o.priority ? '#f97316' : cfg.color}"></div>
         <div style="padding-left:8px">
           <div class="hud-card-top">
-            <div class="hud-order-id">${s(o.order_id)}</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="hud-order-id">${s(o.order_id)}</div>
+              ${o.priority ? '<span class="hud-priority">⚡ PRIORITY</span>' : ''}
+            </div>
             <div class="hud-days ${overdue ? 'overdue' : ''}">${days}</div>
           </div>
           <div class="hud-customer">${s(o.customer_name)}</div>
